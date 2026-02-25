@@ -1,15 +1,37 @@
 import express from 'express';
-
+import cors from 'cors' ;
 import { ENV } from './lib/env.js';
-
+import {serve} from "inngest/express" ;
 import { connectDB } from './lib/db.js';
+import path from 'path';
+
+const __dirname = path.resolve() ;
 
 const app = express();
+app.use(express.json());
+app.use(cors({origin: ENV.CLIENT_URL,credentials:true})) ;
+
 console.log(ENV.PORT);
-app.get("/" , (req,res) => {
+
+//app.use("/api/inngest",serve({client: inngest, functions}));
+/*app.get("/" , (req,res) => {
     res.status(200).json({msg : "api is running"});
 
+}) ;*/
+app.get("/health" , (req,res) => {
+    res.status(200).json({msg : "health endpoint"});
+
 }) ;
+app.get("/books" , (req,res) => {
+    res.status(200).json({msg : "books endpoint"});
+
+}) ;
+if(ENV.NODE_ENV === "production"){
+    app.use(express.static(path.join(__dirname,"../frontend/dist"))) ;
+    app.get("/{*any}" , (req,res) => {
+        res.sendFile(path.join(__dirname,"../frontend" , "dist" , "index.html")) ;
+    })
+}
 
 
 
